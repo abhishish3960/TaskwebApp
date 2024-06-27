@@ -1,20 +1,22 @@
-from flask import jsonify, request, abort
-from app import app, db
+from flask import Blueprint, jsonify, request, abort
 from app.models import Task
+from app import db
 
-@app.route('/api/tasks', methods=['GET'])
+tasks_bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
+
+@tasks_bp.route('/', methods=['GET'])
 def get_tasks():
     tasks = Task.query.all()
     return jsonify([task.serialize() for task in tasks])
 
-@app.route('/api/tasks/<int:id>', methods=['GET'])
+@tasks_bp.route('/<int:id>', methods=['GET'])
 def get_task(id):
     task = Task.query.get(id)
     if not task:
         abort(404)
     return jsonify(task.serialize())
 
-@app.route('/api/tasks', methods=['POST'])
+@tasks_bp.route('/', methods=['POST'])
 def create_task():
     data = request.json
     task = Task(**data)
@@ -22,7 +24,7 @@ def create_task():
     db.session.commit()
     return jsonify(task.serialize()), 201
 
-@app.route('/api/tasks/<int:id>', methods=['PUT'])
+@tasks_bp.route('/<int:id>', methods=['PUT'])
 def update_task(id):
     task = Task.query.get(id)
     if not task:
@@ -33,7 +35,7 @@ def update_task(id):
     db.session.commit()
     return jsonify(task.serialize())
 
-@app.route('/api/tasks/<int:id>', methods=['DELETE'])
+@tasks_bp.route('/<int:id>', methods=['DELETE'])
 def delete_task(id):
     task = Task.query.get(id)
     if not task:

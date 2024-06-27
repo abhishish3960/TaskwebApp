@@ -1,17 +1,26 @@
-# app/__init__.py
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from app.config import Config
 from flask_migrate import Migrate
 from flask_cors import CORS
-# Initialize Flask application
-app = Flask(__name__)
-CORS(app)
-app.config.from_object(Config)
+from app.config import Config
 
-# Initialize SQLAlchemy
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-# Import routes here to avoid circular import
-from app import routes, models
+db = SQLAlchemy()
+migrate = Migrate()
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    # Initialize plugins
+    db.init_app(app)
+    migrate.init_app(app, db)
+    CORS(app)
+
+    # Import and register blueprints
+    from app.routes import tasks_bp
+    app.register_blueprint(tasks_bp)
+
+    # Import models (if needed)
+    from app import models
+
+    return app, db
