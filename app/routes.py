@@ -43,3 +43,21 @@ def delete_task(id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({'message': 'Task deleted'})
+
+@tasks_bp.route('/duplicate/<int:id>', methods=['POST'])
+def duplicate_task(id):
+    task = Task.query.get(id)
+    if not task:
+        abort(404)
+    new_task = Task(
+        entityname=task.entityname,
+        date=task.date,
+        time=task.time,
+        taskType=task.taskType,
+        contactperson=task.contactperson,
+        notes=task.notes,
+        status=task.status
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return jsonify(new_task.serialize()), 201
