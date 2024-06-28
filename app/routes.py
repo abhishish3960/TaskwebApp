@@ -16,13 +16,24 @@ def get_task(id):
         abort(404)
     return jsonify(task.serialize())
 
-@tasks_bp.route('/', methods=['POST'])
-def create_task():
+
+@tasks_bp.route('/add', methods=['POST'])
+def add_task():
     data = request.json
-    task = Task(**data)
+    task = Task(
+        entityname=data.get('entityname'),
+        date=data.get('date'),
+        time=data.get('time'),
+        taskType=data.get('taskType'),
+        contactNumber=data.get('contactNumber'),
+        contactperson=data.get('contactperson'),
+        notes=data.get('notes'),
+        status=data.get('status')
+    )
     db.session.add(task)
     db.session.commit()
     return jsonify(task.serialize()), 201
+
 
 @tasks_bp.route('/<int:id>', methods=['PUT'])
 def update_task(id):
